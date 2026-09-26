@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="description" content="Wenn ich du wäre – das Challenge-Game für Bar, Club und Restaurant." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Wenn ich du wäre</title>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <button id="homeBtn" class="icon-btn hidden" aria-label="Zur Startseite">⌂</button>
+      <div class="brand-mini">WIDW</div>
+      <button id="installBtn" class="pill-btn hidden">Installieren</button>
+    </header>
+
+    <section id="setupScreen" class="screen active">
+      <div class="hero-card">
+        <span class="eyebrow">PARTYGAME</span>
+        <h1>Wenn ich du wäre …</h1>
+        <p>Aufgabe stellen. Mut beweisen. Oder erklären, warum sie wirklich zu hart war.</p>
+      </div>
+
+      <div class="panel">
+        <h2>1. Spielmodus</h2>
+        <div class="mode-grid">
+          <button class="mode-card selected" data-mode="bar">
+            <span class="mode-icon">🍸</span>
+            <strong>Bar / Club</strong>
+            <small>Mehr Action, Fremde & spontane Challenges</small>
+          </button>
+          <button class="mode-card" data-mode="restaurant">
+            <span class="mode-icon">🍝</span>
+            <strong>Restaurant</strong>
+            <small>Mehr Gruppe, Gespräche & Tisch-Challenges</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>2. Spieler</h2>
+            <p>Mindestens 3 Spieler. Ziel: <strong>5 Punkte</strong>.</p>
+          </div>
+          <span id="playerCount" class="counter">0</span>
+        </div>
+        <form id="playerForm" class="add-player-row">
+          <input id="playerName" type="text" maxlength="18" placeholder="Name hinzufügen" autocomplete="off" />
+          <button type="submit" class="primary compact">+</button>
+        </form>
+        <div id="playerList" class="player-list empty-state">Noch keine Spieler hinzugefügt.</div>
+      </div>
+
+      <div class="panel">
+        <h2>3. Verlierer-Einsatz</h2>
+        <label class="field-label" for="loserStake">Was passiert mit dem Letzten?</label>
+        <input id="loserStake" type="text" maxlength="70" value="Bezahlt die nächste Runde" />
+        <p class="hint">Tipp: Bei Geld immer vorher ein Limit vereinbaren.</p>
+      </div>
+
+      <button id="startGameBtn" class="primary big" disabled>Spiel starten</button>
+      <button id="resumeGameBtn" class="secondary big hidden">Laufendes Spiel fortsetzen</button>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <div id="scoreStrip" class="score-strip"></div>
+
+      <div class="round-card">
+        <div class="round-meta">
+          <span id="modeBadge" class="badge">🍸 Bar / Club</span>
+          <span id="roundLabel">Runde 1</span>
+        </div>
+        <p class="kicker">JETZT DRAN</p>
+        <h2 id="activePlayerName">Alex</h2>
+        <p id="setterText" class="muted">Chris stellt die Aufgabe.</p>
+      </div>
+
+      <div id="taskChoiceStep" class="flow-step active">
+        <div class="panel feature-panel">
+          <h3>Wenn ich du wäre …</h3>
+          <p>… würde ich jetzt eine Aufgabe für <strong id="taskTargetName"></strong> stellen.</p>
+          <textarea id="customTaskInput" maxlength="180" placeholder="Eigene Aufgabe eingeben …"></textarea>
+          <button id="useCustomTaskBtn" class="primary big">Eigene Aufgabe spielen</button>
+          <div class="divider"><span>oder</span></div>
+          <button id="suggestTaskBtn" class="secondary big">✨ Aufgabe vorschlagen</button>
+        </div>
+      </div>
+
+      <div id="challengeStep" class="flow-step">
+        <div class="challenge-card">
+          <span class="eyebrow">DEINE CHALLENGE</span>
+          <blockquote id="challengeText"></blockquote>
+          <span id="taskSource" class="source-chip"></span>
+        </div>
+
+        <div class="power-row">
+          <button id="vetoBtn" class="power-btn">🛡️ Veto <small>1×</small></button>
+          <button id="rerollBtn" class="power-btn">🔄 Neue Aufgabe <small>1×</small></button>
+        </div>
+
+        <div class="action-grid">
+          <button id="completeBtn" class="success big">✓ Geschafft</button>
+          <button id="refuseBtn" class="danger big">✕ Verweigern</button>
+        </div>
+      </div>
+
+      <div id="voteIntroStep" class="flow-step">
+        <div class="panel center">
+          <span class="big-emoji">⚖️</span>
+          <h3>War die Aufgabe wirklich zu hart?</h3>
+          <p>Alle außer <strong id="voteReceiver"></strong> stimmen nacheinander geheim ab. Wer „war nicht zu hart“ wählt, kann selbst gezogen werden.</p>
+          <button id="startVoteBtn" class="primary big">Abstimmung starten</button>
+        </div>
+      </div>
+
+      <div id="voteStep" class="flow-step">
+        <div class="panel center">
+          <p class="kicker">HANDY WEITERGEBEN AN</p>
+          <h3 id="voterName"></h3>
+          <p>Findest du die Aufgabe fair?</p>
+          <div class="action-grid">
+            <button id="voteFairBtn" class="success big">War nicht zu hart</button>
+            <button id="voteHardBtn" class="secondary big">War zu hart</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="voteResultStep" class="flow-step">
+        <div class="panel center">
+          <span id="resultEmoji" class="big-emoji">🔥</span>
+          <h3 id="voteResultTitle"></h3>
+          <p id="voteResultText"></p>
+          <div id="proofPotBox" class="proof-box hidden"></div>
+          <button id="continueAfterVoteBtn" class="primary big">Weiter</button>
+        </div>
+      </div>
+
+      <div id="proofStep" class="flow-step">
+        <div class="panel center">
+          <span class="big-emoji">🎯</span>
+          <p class="kicker">DANN MACH DU ES</p>
+          <h3 id="proofPlayerName"></h3>
+          <p>Du hast gesagt, die Aufgabe war nicht zu hart. Jetzt bist du dran:</p>
+          <div class="mini-challenge" id="proofChallenge"></div>
+          <div class="action-grid">
+            <button id="proofCompleteBtn" class="success big">✓ Gemacht</button>
+            <button id="proofSkipBtn" class="secondary big">Nicht gemacht <small>−2 Punkte</small></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="roundEndStep" class="flow-step">
+        <div class="panel center">
+          <span class="big-emoji">👉</span>
+          <h3 id="roundEndTitle">Nächste Runde</h3>
+          <p id="roundEndText"></p>
+          <button id="nextRoundBtn" class="primary big">Nächste Runde</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="winnerScreen" class="screen">
+      <div class="winner-card">
+        <span class="confetti">🏆</span>
+        <p class="kicker">GAME OVER</p>
+        <h1 id="winnerName"></h1>
+        <p>hat zuerst 5 Punkte erreicht.</p>
+      </div>
+
+      <div class="panel center loser-panel">
+        <p class="kicker">UND DER VERLIERER IST …</p>
+        <h2 id="loserName"></h2>
+        <p id="loserStakeResult" class="stake-result"></p>
+        <p id="tieNote" class="hint hidden"></p>
+      </div>
+
+      <div id="finalScores" class="panel"></div>
+      <button id="playAgainBtn" class="primary big">Nochmal spielen</button>
+      <button id="backToSetupBtn" class="secondary big">Neue Gruppe</button>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
