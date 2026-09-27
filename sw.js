@@ -1,4 +1,4 @@
-const CACHE = 'widw-v5';
+const CACHE = 'widw-v6';
 const ASSETS = [
   './',
   './index.html',
