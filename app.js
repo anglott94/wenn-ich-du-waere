@@ -71,6 +71,7 @@ function createEmptyState() {
     voteCursor: 0,
     proofPlayerId: null,
     pendingProof: false,
+    pendingReplacement: false,
     winnerId: null,
     loserId: null,
     tiedLoserIds: []
@@ -180,6 +181,7 @@ function addPoint(player, amount) {
 }
 
 function prepareRound() {
+  state.pendingReplacement = false;
   state.currentTask = null;
   state.currentTaskSource = null;
   state.voters = [];
@@ -271,12 +273,24 @@ function resolveVote() {
   const setter = getSetter();
   // Bei Gleichstand gilt die Aufgabe zugunsten des Spielers als zu hart.
   const majorityHard = hardVotes.length >= fairVotes.length;
+  state.pendingReplacement = false;
+  state.pendingProof = false;
+  state.proofPlayerId = null;
+  $('continueAfterVoteBtn').textContent = 'Weiter';
 
   if (majorityHard) {
-    addPoint(setter, -1);
-    $('resultEmoji').textContent = '↩️';
-    $('voteResultTitle').textContent = 'Backfire!';
-    $('voteResultText').textContent = `Die Gruppe findet die Aufgabe zu hart. ${active.name} bleibt straffrei und ${setter.name} verliert 1 Punkt.`;
+    if (state.currentTaskSource === 'suggested') {
+      state.pendingReplacement = true;
+      $('resultEmoji').textContent = '🔄';
+      $('voteResultTitle').textContent = 'Neue App-Aufgabe';
+      $('voteResultText').textContent = `Die Gruppe findet die App-Aufgabe zu hart. Niemand verliert Punkte. ${active.name} bekommt einen neuen Vorschlag, ohne einen Joker zu verbrauchen.`;
+      $('continueAfterVoteBtn').textContent = 'Neuen Vorschlag anzeigen';
+    } else {
+      addPoint(setter, -1);
+      $('resultEmoji').textContent = '↩️';
+      $('voteResultTitle').textContent = 'Backfire!';
+      $('voteResultText').textContent = `Die Gruppe findet die Aufgabe zu hart. ${active.name} bleibt straffrei und ${setter.name} verliert 1 Punkt.`;
+    }
     $('proofPotBox').classList.add('hidden');
     state.pendingProof = false;
   } else {
@@ -417,7 +431,17 @@ $('voteFairBtn').addEventListener('click', () => recordVote('fair'));
 $('voteHardBtn').addEventListener('click', () => recordVote('hard'));
 
 $('continueAfterVoteBtn').addEventListener('click', () => {
-  if (state.pendingProof && state.proofPlayerId) renderProofStep();
+  if (state.pendingReplacement) {
+    state.currentTask = randomTask();
+    state.currentTaskSource = 'suggested';
+    state.pendingReplacement = false;
+    state.votes = [];
+    state.voters = [];
+    state.voteCursor = 0;
+    renderChallenge();
+    setStep('challengeStep');
+    saveState();
+  } else if (state.pendingProof && state.proofPlayerId) renderProofStep();
   else finishRound('Die Entscheidung der Gruppe steht.');
 });
 
